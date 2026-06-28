@@ -1,33 +1,27 @@
 import { useMemo, useState } from "react";
-
-type Todo = {
-  id: string;
-  label: string;
-  completed: boolean;
-};
+import InputTodo from "./components/todo/InputTodo";
+import type { Todo } from "./types/todo";
+import TodoList from "./components/todo/TodoList";
 
 function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [draft, setDraft] = useState("");
 
   const completedCount = useMemo(
     () => todos.filter((todo) => todo.completed).length,
     [todos],
   );
 
-  const addTodo = () => {
-    const text = draft.trim();
+  const addTodo = (text: string) => {
     if (!text) return;
 
-    setTodos((current) => [
+    setTodos((current: Todo[]) => [
       { id: crypto.randomUUID(), label: text, completed: false },
       ...current,
     ]);
-    setDraft("");
   };
 
   const toggleTodo = (id: string) => {
-    setTodos((current) =>
+    setTodos((current: Todo[]) =>
       current.map((todo) =>
         todo.id === id ? { ...todo, completed: !todo.completed } : todo,
       ),
@@ -56,63 +50,13 @@ function App() {
           </div> */}
         </header>
 
-        <div className="flex my-4 gap-2">
-          <input
-            className="border border-gray-200 rounded px-3 py-2 w-full focus:outline-none focus:ring-1 focus:ring-blue-500"
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            onKeyDown={(event) => event.key === "Enter" && addTodo()}
-            placeholder="Add a new task"
-            aria-label="New todo"
-          />
-          <button
-            type="button"
-            onClick={addTodo}
-            disabled={!draft.trim()}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            Add
-          </button>
-        </div>
+        <InputTodo addTodo={addTodo} />
 
-        <ul className="pb-4">
-          {todos.length === 0 ? (
-            <li className="text-center text-sm text-gray-800 py-1">
-              No todos yet. Add one above.
-            </li>
-          ) : (
-            todos.map((todo) => (
-              <li
-                key={todo.id}
-                className="border border-gray-100 rounded py-2 px-4 flex items-center justify-between mb-2"
-              >
-                <label>
-                  <input
-                    className="mr-2 cursor-pointer"
-                    type="checkbox"
-                    checked={todo.completed}
-                    onChange={() => toggleTodo(todo.id)}
-                  />
-                  <span
-                    className={`cursor-pointer ${
-                      todo.completed ? "text-gray-500 line-through" : ""
-                    }`}
-                  >
-                    {todo.label}
-                  </span>
-                </label>
-                <button
-                  type="button"
-                  className="text-red-500 text-lg font-bold cursor-pointer"
-                  onClick={() => deleteTodo(todo.id)}
-                  aria-label={`Delete ${todo.label}`}
-                >
-                  ×
-                </button>
-              </li>
-            ))
-          )}
-        </ul>
+        <TodoList
+          todos={todos}
+          toggleTodo={toggleTodo}
+          deleteTodo={deleteTodo}
+        />
 
         <footer className="border-t-2 border-gray-200 pt-5 flex justify-center">
           <button
